@@ -8,31 +8,34 @@
 #include <stdio.h>
 #include "rs.h"
 
+#define K 10
+#define N 15
+
 int unit_test()
 {
     int i;
     //    void *code=fec_new(10,15); // 不需要指定，内部会申请
-    char arr[15][100]=
+    char arr[N][100]=
     {
         "origin 01","origin 02","origin 03","origin 04","origin 05",
         "origin 06","origin 07","origin 08","origin 09","origin 10",
         "origin 11","origin 12","origin 13","origin 14","origin 15",
     };
-    char *data[15];
-    for(i=0;i<15;i++)
+    char *data[N];
+    for(i=0;i<N;i++)
     {
         data[i]=arr[i];
     }
     printf("--------origin data start------------\n");
-    for(i=0;i<10;i++)
+    for(i=0;i<K;i++)
     {
         printf("<%s>\n",data[i]);
     }
     printf("--------origin data end------------\n");
     
-    rs_encode2(10,15,data,9);
+    rs_encode2(K,N,data,9);
     printf("++++++++encoded data start++++++++++++\n");
-    for(i=0;i<15;i++)
+    for(i=0;i<N;i++)
     {
         printf("<%s>\n",data[i]);
     }
@@ -41,21 +44,21 @@ int unit_test()
     
     printf("@@@@@@@@trans data start@@@@@@@@@@@@\n");
     data[0]=NULL;
-    data[1]=NULL;
     data[2]=NULL;
     data[10]=NULL;
-    data[12]=NULL;
-    for(i=0;i<15;i++)
+    data[11]=NULL;
+    data[14]=NULL;
+    for(i=0;i<N;i++)
     {
         printf("<%s>\n",data[i]);
     }
     printf("@@@@@@@@trans data end@@@@@@@@@@@@@\n");
     
-    int ret=rs_decode2(10,15,data,9);
+    int ret=rs_decode2(K,N,data,9);
     printf("ret:%d\n",ret);
     
     printf("########decoder data start##########\n");
-    for(i=0;i<15;i++)
+    for(i=0;i<N;i++)
     {
         printf("<%s>\n",data[i]);
     }

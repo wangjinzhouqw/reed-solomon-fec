@@ -599,8 +599,35 @@ invert_vdm(gf *src, int k)
     for (col = 0 ; col < k ; col++ )
       src[col*k + row] = gf_mul(inverse[t], b[col] );
   }
+
   free(c) ;
   free(b) ;
+  free(p) ;
+  return 0 ;
+}
+
+int
+construct_vdm(gf *src, int k)
+{
+  int j, row, col ;
+  gf *p;
+  gf xx ;
+
+  if (k == 1)   /* degenerate case, matrix must be p^0 = 1 */
+    return 0 ;
+
+  p = NEW_GF_MATRIX(1, k);
+
+  for(j=1;j<k;j++){
+    p[j]=gf_exp[modnn(j)];
+  }
+  for(row=0;row<k;row++){
+    xx = p[row];
+    src[row*k] = 1;
+    for(col=1;col<k;col++){
+      src[row*k+col]=gf_mul(src[row*k+col-1], xx);
+    }
+  }
   free(p) ;
   return 0 ;
 }
@@ -677,13 +704,13 @@ fec_new(int k, int n)
    * fill the matrix with powers of field elements, starting from 0.
    * The first row is special, cannot be computed with exp. table.
    */
-  tmp_m[0] = 1 ;
-  for (col = 1; col < k ; col++)
-    tmp_m[col] = 0 ;
-  for (p = tmp_m + k, row = 0; row < n-1 ; row++, p += k) {
-    for ( col = 0 ; col < k ; col ++ )
-      p[col] = gf_exp[modnn(row*col)];
-  }
+//  tmp_m[0] = 1 ;
+//  for (col = 1; col < k ; col++)
+//    tmp_m[col] = 0 ;
+//  for (p = tmp_m + k, row = 0; row < n-1 ; row++, p += k) {
+//    for ( col = 0 ; col < k ; col ++ )
+//      p[col] = gf_exp[modnn(row*col)];
+//  }
 
   /*
    * quick code to build systematic matrix: invert the top
@@ -691,8 +718,10 @@ fec_new(int k, int n)
    * by the inverse, and construct the identity matrix at the top.
    */
   TICK(ticks[3]);
-  invert_vdm(tmp_m, k); /* much faster than invert_mat */
-  matmul(tmp_m + k*k, tmp_m, retval->enc_matrix + k*k, n - k, k, k);
+//  invert_vdm(tmp_m, k); /* much faster than invert_mat */
+  construct_vdm(tmp_m, k); /* much faster than invert_mat */
+//  matmul(tmp_m + k*k, tmp_m, retval->enc_matrix + k*k, n - k, k, k);
+  memcpy(retval->enc_matrix + k*k, tmp_m, k*(n-k));
   /*
    * the upper matrix is I so do not bother with a slow multiply
    */
